@@ -2,6 +2,14 @@ import websocket
 import requests
 import json
 from matrix_lite import led
+import RPi.GPIO as GPIO
+
+GPIO.setmode(GPIO.BOARD)
+
+GPIO.setup(11,GPIO.OUT)
+lightsservo = GPIO.PWM(11,50)
+lightsservo.start(0)
+
 
 def say(text):
     url = "http://localhost:12101/api/text-to-speech"
@@ -16,6 +24,9 @@ def on_message(ws, message):
     if ("Led" == data["intent"]["name"]):
         led.set(data["slots"]["color"])
         say("Device changed to: " + data["slots"]["color"])
+        lightsservo.start(0)
+        lightsservo.ChangeDutyCycle(12)
+        lightsservo.stop()
 
 def on_error(ws, error):
     print(error)
