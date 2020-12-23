@@ -2,13 +2,17 @@ import websocket
 import requests
 import json
 from matrix_lite import led
-import RPi.GPIO as GPIO
+import time
+import servo
+import Weather
 
-GPIO.setmode(GPIO.BOARD)
+lightservopin = 0
+lightson = True
 
-GPIO.setup(11,GPIO.OUT)
-lightsservo = GPIO.PWM(11,50)
-lightsservo.start(0)
+servo.send_servo_command(0,0)
+#servotest2.send_servo_command(0,180)
+
+
 
 
 def say(text):
@@ -17,16 +21,28 @@ def say(text):
 
 # Intents are passed through here
 def on_message(ws, message):
+    global lightson
     data = json.loads(message)
     print("**Captured New Intent**")
     print(data)
 
-    if ("Led" == data["intent"]["name"]):
-        led.set(data["slots"]["color"])
-        say("Device changed to: " + data["slots"]["color"])
-        lightsservo.start(0)
-        lightsservo.ChangeDutyCycle(12)
-        lightsservo.stop()
+    if ("Lights" == data["intent"]["name"]):
+        #led.set(data["slots"]["color"])
+        #say("Yes")
+        if (lightson == True):
+            servo.send_servo_command(0,180)
+            lightson = False
+        else:
+            servo.send_servo_command(0,0)
+            lightson = True
+    elif ("Weather" == data["intent"]["name"]):
+        r = requests.get('http://api.openweathermap.org/data/2.5/weather?q=Flemingsburg&appid=ac82ae9e71d61ae8a6335898730be24b&units=imperial')
+        data = r.json()
+        precip = data["weather"][0]['main']
+        temp = data['main']['temp']
+        currweather = Weather.Weather(precip,temp)
+        currweather.playPrecipitationSound()
+        currweather.sayTemperature()
 
 def on_error(ws, error):
     print(error)
