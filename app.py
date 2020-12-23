@@ -36,7 +36,7 @@ def on_message(ws, message):
             servo.send_servo_command(0,0)
             lightson = True
     elif ("Weather" == data["intent"]["name"]):
-        r = requests.get('http://api.openweathermap.org/data/2.5/weather?q=Flemingsburg&appid=ac82ae9e71d61ae8a6335898730be24b&units=imperial')
+        r = requests.get('http://api.openweathermap.org/data/2.5/weather?q=Flemingsburg&appid="YOUR_ID_HERE"&units=imperial')
         data = r.json()
         precip = data["weather"][0]['main']
         temp = data['main']['temp']
